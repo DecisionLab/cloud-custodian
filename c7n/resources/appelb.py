@@ -825,7 +825,20 @@ class AppELBHealthCheckProtocolMismatchFilter(Filter,
 
 @filters.register('target-group')
 class AppELBTargetGroupFilter(ValueFilter, AppELBTargetGroupFilterBase):
-    """Filter ALB based on matching target group value"""
+    """Filter ALB based on matching target group value
+
+    :example:
+
+    .. code-block:: yaml
+
+            policies:
+              - name: app-elb-insecure-targets
+                resource: app-elb
+                filters:
+                  - type: target-group
+                    key: Protocol
+                    value: HTTP
+    """
 
     schema = type_schema('target-group', rinherit=ValueFilter.schema)
     permissions = ("elasticloadbalancing:DescribeTargetGroups",)
@@ -836,7 +849,11 @@ class AppELBTargetGroupFilter(ValueFilter, AppELBTargetGroupFilterBase):
 
     def __call__(self, alb):
         target_groups = self.target_group_map[alb['LoadBalancerArn']]
-        return self.match(target_groups)
+        found_groups = False
+        for group in target_groups:
+            if self.match(group):
+                found_groups = True
+        return found_groups
 
 
 @filters.register('default-vpc')
