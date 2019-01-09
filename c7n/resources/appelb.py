@@ -852,6 +852,7 @@ class AppELBTargetGroupFilter(ValueFilter, AppELBTargetGroupFilterBase):
         found_groups = False
         for group in target_groups:
             if self.match(group):
+                set_annotation(alb, 'c7n:MatchedTargetGroups', group)
                 found_groups = True
         return found_groups
 
